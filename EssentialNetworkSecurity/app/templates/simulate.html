@@ -1,0 +1,115 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Connection Simulation</title>
+    <link
+      rel="stylesheet"
+      href="{{ url_for('static', filename='style.css') }}"
+    />
+  </head>
+  <body>
+    <header class="topbar">
+      <div>
+        <h1>Connection Simulator</h1>
+        <p>Test firewall decisions using saved rules</p>
+      </div>
+      <a class="nav-link" href="{{ url_for('index') }}"> Back to Dashboard </a>
+    </header>
+
+    <main class="container">
+      {% with messages = get_flashed_messages(with_categories=true) %} {% if
+      messages %}
+      <section class="messages">
+        {% for category, message in messages %}
+        <p class="message {{ category }}">{{ message }}</p>
+        {% endfor %}
+      </section>
+      {% endif %} {% endwith %}
+
+      <section class="panel">
+        <div class="panel-heading">
+          <div>
+            <h2>Simulate a Connection</h2>
+            <p>Enter the connection details below.</p>
+          </div>
+        </div>
+
+        <form method="POST" class="rule-form">
+          <label>
+            Source IP
+            <input
+              name="source_ip"
+              value="{{ form_data.source_ip }}"
+              placeholder="192.168.56.101"
+              required
+            />
+          </label>
+
+          <label>
+            Destination IP
+            <input
+              name="destination_ip"
+              value="{{ form_data.destination_ip }}"
+              placeholder="192.168.56.10"
+              required
+            />
+          </label>
+
+          <label>
+            Protocol
+            <select name="protocol" required>
+              <option value="TCP">TCP</option>
+              <option value="UDP">UDP</option>
+              <option value="ICMP">ICMP</option>
+            </select>
+          </label>
+
+          <label>
+            Destination Port
+            <input
+              name="destination_port"
+              type="number"
+              min="1"
+              max="65535"
+              value="{{ form_data.destination_port }}"
+              required
+            />
+          </label>
+
+          <button type="submit" class="submit-button">Test Connection</button>
+        </form>
+      </section>
+
+      {% if result %}
+      <section class="panel result-panel">
+        <h2>Simulation Result</h2>
+
+        <p>
+          Decision:
+          <span
+            class="badge
+                    {{ 'allow' if result.action == 'ALLOW' else 'deny' }}"
+          >
+            {{ result.action }}
+          </span>
+        </p>
+
+        <p>{{ result.message }}</p>
+
+        {% if result.matched_rule is not none %}
+        <p>Matched rule priority: {{ result.matched_rule }}</p>
+        {% else %}
+        <p>No firewall rule matched this connection.</p>
+        {% endif %}
+      </section>
+      {% endif %}
+
+      <p class="notice">
+        This is a simulation. No real network connection is created, and the
+        operating system firewall is not modified.
+      </p>
+    </main>
+  </body>
+</html>

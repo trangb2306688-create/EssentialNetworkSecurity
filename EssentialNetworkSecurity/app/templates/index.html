@@ -1,0 +1,191 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Firewall Management Dashboard</title>
+    <link
+      rel="stylesheet"
+      href="{{ url_for('static', filename='style.css') }}"
+    />
+  </head>
+  <body>
+    <header class="topbar">
+      <div>
+        <h1>Firewall Control Center</h1>
+        <p>Network Access Control Dashboard</p>
+      </div>
+      <div class="header-actions">
+        <span class="status">SIMULATION MODE</span>
+        <a class="nav-link" href="{{ url_for('simulate') }}">
+          Simulate Connection
+        </a>
+        <a class="nav-link" href="{{ url_for('audit_logs') }}"> Audit Log </a>
+        <a class="nav-link" href="{{ url_for('blocked_traffic') }}">
+          Blocked Traffic
+        </a>
+      </div>
+    </header>
+
+    <main class="container">
+      <section class="summary">
+        <article class="stat-card">
+          <p>Total Rules</p>
+          <h2>{{ total_rules }}</h2>
+        </article>
+        <article class="stat-card allow-card">
+          <p>Active ALLOW Rules</p>
+          <h2>{{ allow_count }}</h2>
+        </article>
+        <article class="stat-card deny-card">
+          <p>Active DENY Rules</p>
+          <h2>{{ deny_count }}</h2>
+        </article>
+      </section>
+
+      {% with messages = get_flashed_messages(with_categories=true) %} {% if
+      messages %}
+      <section class="messages">
+        {% for category, message in messages %}
+        <p class="message {{ category }}">{{ message }}</p>
+        {% endfor %}
+      </section>
+      {% endif %} {% endwith %}
+
+      <section class="panel">
+        <div class="panel-heading">
+          <div>
+            <h2>Add Firewall Rule</h2>
+            <p>Enter the connection criteria for the new rule.</p>
+          </div>
+        </div>
+
+        <form method="POST" class="rule-form">
+          <label>
+            Source IP / Subnet
+            <input
+              type="text"
+              name="source_ip"
+              placeholder="192.168.56.0/24 or ANY"
+              required
+            />
+          </label>
+
+          <label>
+            Destination IP / Subnet
+            <input
+              type="text"
+              name="destination_ip"
+              placeholder="192.168.56.10 or ANY"
+              required
+            />
+          </label>
+
+          <label>
+            Protocol
+            <select name="protocol" required>
+              <option value="TCP">TCP</option>
+              <option value="UDP">UDP</option>
+              <option value="ICMP">ICMP</option>
+              <option value="ANY">ANY</option>
+            </select>
+          </label>
+
+          <label>
+            Destination Port
+            <input type="text" name="port" placeholder="80 or ANY" required />
+          </label>
+
+          <label>
+            Action
+            <select name="action" required>
+              <option value="ALLOW">ALLOW</option>
+              <option value="DENY">DENY</option>
+            </select>
+          </label>
+
+          <button type="submit" class="submit-button">Add Rule</button>
+        </form>
+      </section>
+
+      <section class="panel">
+        <div class="panel-heading">
+          <div>
+            <h2>Firewall Rules</h2>
+            <p>Rules are evaluated by priority.</p>
+          </div>
+        </div>
+
+        <div class="table-wrapper">
+          <table>
+            <thead>
+              <tr>
+                <th>Priority</th>
+                <th>Source IP</th>
+                <th>Destination IP</th>
+                <th>Protocol</th>
+                <th>Port</th>
+                <th>Action</th>
+                <th>Status</th>
+                <th>Actions</th>
+              </tr>
+            </thead>
+            <tbody>
+              {% for rule in rules %}
+              <tr>
+                <td>{{ rule.priority }}</td>
+                <td>{{ rule.source_ip }}</td>
+                <td>{{ rule.destination_ip }}</td>
+                <td>{{ rule.protocol }}</td>
+                <td>{{ rule.port }}</td>
+                <td>
+                  <span
+                    class="badge
+                                    {{ 'allow' if rule.action == 'ALLOW' else 'deny' }}"
+                  >
+                    {{ rule.action }}
+                  </span>
+                </td>
+
+                <td>{{ 'Enabled' if rule.enabled else 'Disabled' }}</td>
+                <td class="actions">
+                  <form
+                    method="POST"
+                    action="{{ url_for('toggle_rule', rule_id=rule.id) }}"
+                  >
+                    <button type="submit" class="action-button toggle-button">
+                      {{ 'Disable' if rule.enabled else 'Enable' }}
+                    </button>
+                  </form>
+
+                  <form
+                    method="POST"
+                    action="{{ url_for('delete_rule', rule_id=rule.id) }}"
+                    onsubmit="return confirm('Delete this firewall rule?');"
+                  >
+                    <button type="submit" class="action-button delete-button">
+                      Delete
+                    </button>
+                  </form>
+
+                  <a
+                    class="edit-button"
+                    href="{{ url_for('edit_rule', rule_id=rule['id']) }}"
+                  >
+                    Edit
+                  </a>
+                </td>
+              </tr>
+              {% endfor %}
+            </tbody>
+          </table>
+        </div>
+      </section>
+
+      <p class="notice">
+        This dashboard simulates firewall decisions. It does not change the
+        operating system firewall.
+      </p>
+    </main>
+  </body>
+</html>

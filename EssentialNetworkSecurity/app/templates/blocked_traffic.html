@@ -1,0 +1,65 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Blocked Traffic History</title>
+    <link
+      rel="stylesheet"
+      href="{{ url_for('static', filename='style.css') }}"
+    />
+  </head>
+  <body>
+    <header class="topbar">
+      <div>
+        <h1>Blocked Traffic History</h1>
+        <p>History of denied simulated connections</p>
+      </div>
+
+      <a class="nav-link" href="{{ url_for('index') }}"> Back to Dashboard </a>
+    </header>
+
+    <main class="container">
+      <section class="panel">
+        <h2>Blocked Connections</h2>
+
+        {% if blocked_records %}
+        <div class="table-container">
+          <table>
+            <thead>
+              <tr>
+                <th>Time</th>
+                <th>Source IP</th>
+                <th>Destination IP</th>
+                <th>Protocol</th>
+                <th>Port</th>
+                <th>Matched Rule</th>
+                <th>Reason</th>
+              </tr>
+            </thead>
+
+            <tbody>
+              {% for record in blocked_records %}
+              <tr>
+                <td>{{ record['timestamp'] }}</td>
+                <td>{{ record['source_ip'] }}</td>
+                <td>{{ record['destination_ip'] }}</td>
+                <td>{{ record['protocol'] }}</td>
+                <td>{{ record['destination_port'] }}</td>
+                <td>
+                  {% if record['matched_rule'] is not none %} {{
+                  record['matched_rule'] }} {% else %} Default DENY {% endif %}
+                </td>
+                <td>{{ record['reason'] }}</td>
+              </tr>
+              {% endfor %}
+            </tbody>
+          </table>
+        </div>
+        {% else %}
+        <p>No blocked traffic records available yet.</p>
+        {% endif %}
+      </section>
+    </main>
+  </body>
+</html>

@@ -1,0 +1,54 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Audit Log</title>
+    <link
+      rel="stylesheet"
+      href="{{ url_for('static', filename='style.css') }}"
+    />
+  </head>
+  <body>
+    <header class="topbar">
+      <div>
+        <h1>Audit Log</h1>
+        <p>History of firewall rule changes</p>
+      </div>
+      <a class="nav-link" href="{{ url_for('index') }}"> Back to Dashboard </a>
+    </header>
+
+    <main class="container">
+      <section class="panel">
+        <h2>Policy Change History</h2>
+
+        {% if logs %}
+        <div class="table-container">
+          <table>
+            <thead>
+              <tr>
+                <th>Time</th>
+                <th>Operation</th>
+                <th>Rule ID</th>
+                <th>Details</th>
+              </tr>
+            </thead>
+            <tbody>
+              {% for log in logs %}
+              <tr>
+                <td>{{ log['timestamp'] }}</td>
+                <td>{{ log['operation'] }}</td>
+                <td>{{ log['rule_id'] or '-' }}</td>
+                <td>{{ log['details'] }}</td>
+              </tr>
+              {% endfor %}
+            </tbody>
+          </table>
+        </div>
+        {% else %}
+        <p>No audit records available yet.</p>
+        {% endif %}
+      </section>
+    </main>
+  </body>
+</html>

@@ -1,0 +1,89 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Edit Firewall Rule</title>
+    <link rel="stylesheet"
+          href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+    <header class="topbar">
+        <div>
+            <h1>Edit Firewall Rule</h1>
+            <p>Update the selected firewall rule</p>
+        </div>
+        <a class="nav-link" href="{{ url_for('index') }}">
+            Back to Dashboard
+        </a>
+    </header>
+
+    <main class="container">
+        {% with messages = get_flashed_messages(with_categories=true) %}
+            {% if messages %}
+                <section class="messages">
+                    {% for category, message in messages %}
+                        <p class="message {{ category }}">{{ message }}</p>
+                    {% endfor %}
+                </section>
+            {% endif %}
+        {% endwith %}
+
+        <section class="panel">
+            <form method="POST" class="rule-form">
+                <label>
+                    Source IP / Subnet
+                    <input name="source_ip"
+                           value="{{ rule['source_ip'] }}"
+                           required>
+                </label>
+
+                <label>
+                    Destination IP / Subnet
+                    <input name="destination_ip"
+                           value="{{ rule['destination_ip'] }}"
+                           required>
+                </label>
+
+                <label>
+                    Protocol
+                    <select name="protocol" required>
+                        {% for p in ['TCP', 'UDP', 'ICMP', 'ANY'] %}
+                            <option value="{{ p }}"
+                                {% if rule['protocol'] == p %}selected{% endif %}>
+                                {{ p }}
+                            </option>
+                        {% endfor %}
+                    </select>
+                </label>
+
+                <label>
+                    Port
+                    <input name="port"
+                           value="{{ rule['port'] }}"
+                           required>
+                </label>
+
+                <label>
+                    Action
+                    <select name="action" required>
+                        <option value="ALLOW"
+                            {% if rule['action'] == 'ALLOW' %}selected{% endif %}>
+                            ALLOW
+                        </option>
+                        <option value="DENY"
+                            {% if rule['action'] == 'DENY' %}selected{% endif %}>
+                            DENY
+                        </option>
+                    </select>
+                </label>
+
+                <button type="submit" class="submit-button">
+                    Save Changes
+                </button>
+            </form>
+        </section>
+    </main>
+</body>
+</html>
